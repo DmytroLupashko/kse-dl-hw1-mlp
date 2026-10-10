@@ -1,6 +1,6 @@
 # Stage 5 Guide: Frameworks, Training Loop & Logging
 
-This expands **§5 Training Infrastructure & Engineering** of the [DL Development Pipeline](DL_Development_Pipeline.md), based on [Frameworks.ipynb](../Module_1/Lecture_5/Frameworks.ipynb) (Lecture 5). Goal: a training setup where data loading, the training loop, logging and training tricks are standard pieces, so that every experiment is comparable, reproducible and cheap to run.
+This expands **§5 Training Infrastructure & Engineering** of the [DL Development Pipeline](DL_Development_Pipeline.md). Goal: a training setup where data loading, the training loop, logging and training tricks are standard pieces, so that every experiment is comparable, reproducible and cheap to run.
 
 > **Rule of thumb:** a hand-written loop is fine for a first experiment. Switch to a framework once you need checkpoints, early stopping, logging or several runs to compare — that's usually by the second week of a project.
 
@@ -99,12 +99,12 @@ bf16 keeps float32's range, so it rarely needs loss scaling; fp16 needs it (Ligh
 
 ## Worked Example: ASHRAE Great Energy Predictor III
 
-Homework 1 ([mlp.ipynb](../Homeworks/Homework%201/models/mlp.ipynb)) trains its MLPs with Lightning and tracks them in MLflow. How it maps to this guide:
+Homework 1 ([mlp.ipynb](../../models/notebooks/mlp.ipynb)) trains its MLPs with Lightning and tracks them in MLflow. How it maps to this guide:
 
 - **Data flow:** 3M rows × 33 features fit in memory — the tabular exception in §2. The Dataset keeps them as tensors and implements `__getitems__`, so each batch is one indexing step while the DataLoader still shuffles and batches; the collator just passes the batch through.
 - **One module, many networks:** every network takes the same inputs `(x, meter, building)`, so a single `LightningModule` trains all five MLPs with `torchmetrics` RMSLE.
 - **Tracking:** each run logs its settings, per-epoch training and validation RMSLE, and per-meter scores to a local MLflow SQLite file; the results table and learning curves are read back from MLflow.
-- **Shared code:** the Dataset, networks, `LightningModule` and an MLflow `Experiment` helper live in a small package ([ashrae/](../Homeworks/Homework%201/ashrae)) that every notebook imports, so each experiment notebook contains only what it changes.
+- **Shared code:** the Dataset, networks, `LightningModule` and an MLflow `Experiment` helper live in a small package ([ashrae/](../../ashrae)) that every notebook imports, so each experiment notebook contains only what it changes.
 - **Next:** four seasonal folds are one `Experiment.fit()` call per fold's loaders, and early stopping one callback.
 - **Reproducibility:** training on Apple MPS isn't fully deterministic. The same model and seed scored 1.1075 and 1.1084 in two runs, so differences below ~0.01 are treated as noise.
 - **Framework pitfall:** in the same process, PyTorch and LightGBM each load their own OpenMP runtime, and multi-threaded LightGBM crashed the kernel on macOS. The fix was `n_jobs=1` for LightGBM, or running it in a separate notebook.

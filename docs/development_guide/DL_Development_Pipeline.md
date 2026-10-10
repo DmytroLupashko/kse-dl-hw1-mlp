@@ -1,6 +1,6 @@
 # Deep Learning Development Pipeline
 
-A synthesis of Module 1 ([Intro](../Module_1/Lecture_1/Intro_to_Deep_Learning.ipynb), [Gradients](../Module_1/Lecture_2/gradients_are_our_best_friends.ipynb), [Validation](../Module_1/Lecture_3/Validation.ipynb), [Regularization](../Module_1/Lecture_4/regularization_and_friends.ipynb), [Frameworks](../Module_1/Lecture_5/Frameworks.ipynb)) into a single, ordered pipeline for approaching a new deep learning problem — from raw task to a defensible final report. Each stage lists *what to do* and *what can go wrong if you skip it*.
+A single, ordered pipeline for approaching a new deep learning problem — from raw task to a defensible final report. Each stage lists *what to do* and *what can go wrong if you skip it*.
 
 ---
 

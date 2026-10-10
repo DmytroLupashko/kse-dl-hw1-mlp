@@ -1,6 +1,6 @@
 # Stage 1 Guide: Exploratory Data Analysis & Metric Analysis
 
-This expands **Stage 1** of the [DL Development Pipeline](DL_Development_Pipeline.md). It combines the course material ([Formalization](../Module_1/Lecture_1/Intro_to_Deep_Learning.ipynb), [Evaluation Metrics](../Module_1/Lecture_3/Validation.ipynb)) with general EDA best practice. Goal: by the end of this stage you should understand your data well enough to design a validation strategy (Stage 2) and know exactly what "good performance" means for this task.
+This expands **Stage 1** of the [DL Development Pipeline](DL_Development_Pipeline.md). Goal: by the end of this stage you should understand your data well enough to design a validation strategy (Stage 2) and know exactly what "good performance" means for this task.
 
 > **Ground rule:** perform EDA on the **train split only** (or train + unlabeled test features, never test labels). If you look at test-set statistics or targets before splitting, any conclusion you draw can leak into modeling decisions and silently inflate your validation score later.
 
@@ -50,7 +50,7 @@ This is a lightweight preview of the full **adversarial validation** you'll form
 
 ## 7. Target Metric Analysis (course-specific requirement)
 
-Beyond exploring the data, explicitly analyze the metric you'll be optimized/graded on (see [Validation.ipynb §2](../Module_1/Lecture_3/Validation.ipynb)):
+Beyond exploring the data, explicitly analyze the metric you'll be optimized/graded on:
 - **Separate optimization loss from evaluation metric.** They often differ (e.g. optimizing log-loss while being evaluated on F1) — know why, and whether that gap could bite you.
 - **List the metric's edge cases and failure modes** — e.g. accuracy misleading under class imbalance, MAPE blowing up near zero targets, ROC-AUC insensitive to calibration, F1 being threshold-dependent.
 - **Propose a complementary metric** that captures an aspect of performance the primary metric misses (e.g. pair accuracy with PR-AUC under imbalance, or pair RMSE with MAE to separately check outlier sensitivity).

@@ -1,6 +1,6 @@
 # Stage 2 Guide: Validation Strategy Design
 
-This expands **Stage 2** of the [DL Development Pipeline](DL_Development_Pipeline.md). It combines course material ([Validation.ipynb §3–5](../Module_1/Lecture_3/Validation.ipynb)) with general best practice for cross-validation design and adversarial validation. Goal: end this stage with a **fixed, code-frozen validation split** that you trust to correlate with real-world/leaderboard performance, and reuse identically for every model in Stages 3–6.
+This expands **Stage 2** of the [DL Development Pipeline](DL_Development_Pipeline.md). It covers cross-validation design and adversarial validation. Goal: end this stage with a **fixed, code-frozen validation split** that you trust to correlate with real-world/leaderboard performance, and reuse identically for every model in Stages 3–6.
 
 > **Why this stage exists:** you can drive training loss to ~0 by adding enough capacity (nonlinear features, more layers) — that tells you nothing about generalization. Validation exists to model unseen data using only the data you already have, so you can tell a genuinely better model from an overfit one before it's too late to find out.
 

@@ -1,6 +1,6 @@
 # Stage 4.5 Guide: Regularization
 
-This expands **§4.5 Regularization** of the [DL Development Pipeline](DL_Development_Pipeline.md). It builds on the course material ([regularization_and_friends.ipynb](../Module_1/Lecture_4/regularization_and_friends.ipynb)) and adds a practical order of work, typical settings, and how to regularize against a **distribution shift** such as seasons. Goal: close the gap between training and validation error without making either worse.
+This expands **§4.5 Regularization** of the [DL Development Pipeline](DL_Development_Pipeline.md). It gives a practical order of work, typical settings, and how to regularize against a **distribution shift** such as seasons. Goal: close the gap between training and validation error without making either worse.
 
 > **Rule of thumb:** regularization trades a little training fit for better generalization. It only helps when the model is overfitting. If training error is already high, you need more capacity or better features, not regularization.
 
@@ -83,7 +83,7 @@ The aim is different from ordinary regularization: make the model rely on relati
 
 ## Worked Example: ASHRAE Great Energy Predictor III
 
-Homework 1: predict hourly energy use of ~1,450 buildings; see [EDA.ipynb](../Homeworks/Homework%201/eda/EDA.ipynb), [mlp.ipynb](../Homeworks/Homework%201/models/mlp.ipynb) and [adversarial.ipynb](../Homeworks/Homework%201/validation/adversarial.ipynb).
+Homework 1: predict hourly energy use of ~1,450 buildings; see [EDA.ipynb](../../eda/notebooks/EDA.ipynb), [mlp.ipynb](../../models/notebooks/mlp.ipynb) and [adversarial.ipynb](../../validation/notebooks/adversarial.ipynb).
 
 - **Diagnosis:** the best MLP (4 meter outputs + a 16-dimensional building embedding) reaches training RMSLE 0.80 but validation 1.11: clear overfitting.
 - **Label cleaning came first, and paid most.** Before zero-electricity readings were removed, the building-identity models got *worse* on validation after epoch 1: they had memorized that some buildings use no power. After cleaning, validation improved every epoch and RMSLE fell from 1.365 to 1.108.
@@ -96,7 +96,7 @@ Homework 1: predict hourly energy use of ~1,450 buildings; see [EDA.ipynb](../Ho
   5. heating/cooling degree-hours and 24-hour / 7-day rolling temperature per site;
   6. retrain on all of 2016 and average the fold models.
 - **Success looks like:** mean fold RMSLE falls, the spread across folds shrinks, and the train–validation gap narrows.
-- **Result** ([regularization_test.ipynb](../Homeworks/Homework%201/models/regularization_test.ipynb)): on four seasonal folds, weight decay, dropout, a smaller embedding and their combination all failed to improve validation (best: none, 1.200). Validation was still improving at epoch 10, so the gap wasn't classic overfitting but the difference between seasons (1.05–1.42 across folds). Dropout alone would have looked like a win on October–December only. Lesson: diagnose with §1 first — here the fix is seasonal features (§4), not a penalty.
+- **Result** ([regularization_test.ipynb](../../models/notebooks/regularization_test.ipynb)): on four seasonal folds, weight decay, dropout, a smaller embedding and their combination all failed to improve validation (best: none, 1.200). Validation was still improving at epoch 10, so the gap wasn't classic overfitting but the difference between seasons (1.05–1.42 across folds). Dropout alone would have looked like a win on October–December only. Lesson: diagnose with §1 first — here the fix is seasonal features (§4), not a penalty.
 
 ---
 
