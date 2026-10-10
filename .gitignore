@@ -1,0 +1,24 @@
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.venv/
+venv/
+.env
+.ipynb_checkpoints/
+
+# OS / editors
+.DS_Store
+.vscode/
+.idea/
+
+# Data (large, download from Kaggle)
+data/
+
+# MLflow
+mlruns/
+mlflow.db
+
+# Local-only files
+Assignment_1_Task.md
+link.txt
