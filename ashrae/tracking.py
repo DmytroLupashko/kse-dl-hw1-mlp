@@ -1,12 +1,18 @@
 """MLflow bookkeeping: one `Experiment` per notebook run, tagging every run with that run's session."""
 from time import strftime
 
-import lightning.pytorch as L
 import mlflow
-from lightning.pytorch.loggers import MLFlowLogger
 
 from .config import MLFLOW_URI
-from .modeling import EnergyModel
+
+
+def log_run(experiment, run_name, *, params, metrics, tags=None):
+    """Logs one finished run to `experiment`, for models trained outside `Experiment.fit` (no torch needed)."""
+    mlflow.set_tracking_uri(MLFLOW_URI)
+    mlflow.set_experiment(experiment)
+    with mlflow.start_run(run_name=run_name, tags=tags):
+        mlflow.log_params(params)
+        mlflow.log_metrics(metrics)
 
 
 class Experiment:
@@ -19,6 +25,12 @@ class Experiment:
 
     def fit(self, make_net, train_loader, val_loader=None, *, run_name, epochs, tags=None, **model_kw):
         """Seeds, builds the net, trains it for `epochs` and logs the run. Returns the model and its run id."""
+        # Imported here so that `log_run` works without torch (LightGBM crashes next to it unless single-threaded)
+        import lightning.pytorch as L
+        from lightning.pytorch.loggers import MLFlowLogger
+
+        from .modeling import EnergyModel
+
         L.seed_everything(0, verbose=False)
         model = EnergyModel(make_net(), **model_kw)
         logger = MLFlowLogger(self.name, tracking_uri=MLFLOW_URI, run_name=run_name,
