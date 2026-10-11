@@ -73,11 +73,11 @@ Neural networks use the same idea, with epochs instead of trees.
 
 ## What this project uses
 
-Notebook: [exp03_tuning.ipynb](../notebooks/exp03_tuning.ipynb), card: [exp03_tuning.md](../experiments/exp03_tuning.md).
+Cards: [exp03 tree size](../experiments/exp03_tree_size.md), [exp04 regularization](../experiments/exp04_regularization.md), [exp05 tuned model](../experiments/exp05_tuned.md).
 
 | Practice | In this project |
 | --- | --- |
-| Search method | staged search: Stage A tree size, Stage B regularization on top of the best Stage A trial, one change per trial |
+| Search method | staged search: Stage A tree size, Stage B regularization on top of 127 leaves (sizes within noise; 127 leaves room under the tree limit for slower settings), one change per trial |
 | Validation | the 4 seasonal folds used everywhere; 2M training / 500K validation rows per fold |
 | Learning rate | fixed at 0.1 |
 | Number of trees | early stopping per fold: up to 5,000 trees, patience 200, on all validation rows; the trial's tree count is the mean over the folds |

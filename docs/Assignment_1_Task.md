@@ -22,7 +22,7 @@
 
 - [x] Do dedicated feature engineering for the tree-based model
 - [x] Train a tree-based baseline (Random Forest, Gradient Boosting, sklearn, …)
-- [ ] Collect results: metrics, feature importance, parameter tuning logs
+- [x] Collect results: metrics, feature importance, parameter tuning logs
 - [x] Submit predictions; compare Private/Public LB with local validation
 - [x] Conclude whether the model is adequate
 

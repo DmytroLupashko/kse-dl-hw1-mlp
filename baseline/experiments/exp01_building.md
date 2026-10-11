@@ -6,7 +6,7 @@ Does LightGBM improve when it knows which building a row comes from, and by how 
 
 ## Setup
 
-- **Notebook:** [exp01_building.ipynb](../notebooks/exp01_building.ipynb)
+- **Notebook:** [exp01_building.ipynb](../notebooks/experiments/exp01_building.ipynb)
 - **MLflow experiment:** `ashrae-baseline-building`, session `2026-10-11 11:16:15`, 8 runs named `<model> | <fold>`; all numbers below are read from these runs
 - **Model and parameters:** `LGBMRegressor`, 500 trees, learning rate 0.1, 63 leaves, everything else default
 - **Features:** the 33 shared features from [ashrae/features.py](../../ashrae/features.py); lgbm_building adds `building_id` as a categorical

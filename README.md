@@ -25,7 +25,7 @@ Each section has a report and its notebooks:
 ├── ashrae/          shared code: paths, data loading, features, models, MLflow tracking
 ├── eda/             eda_report.md, notebooks/ (EDA, data_aggregation)
 ├── validation/      validation_report.md, notebooks/, figures/
-├── baseline/        baseline_report.md, experiments/ (one card per experiment), notebooks/ (submission_baseline)
+├── baseline/        baseline_report.md, experiments/ (one card per experiment), notebooks/experiments/, notebooks/submissions/ (untuned, tuned, 31 leaves)
 ├── models/          models_report.md, notebooks/, figures/
 ├── ensemble/        ensemble_report.md, notebooks/ (ensemble, submission), figures/
 ├── docs/            assignment PDF, development guide

@@ -6,7 +6,7 @@ Does lgbm_building get better with more training rows?
 
 ## Setup
 
-- **Notebook:** [exp02_training_rows.ipynb](../notebooks/exp02_training_rows.ipynb)
+- **Notebook:** [exp02_training_rows.ipynb](../notebooks/experiments/exp02_training_rows.ipynb)
 - **MLflow experiment:** `ashrae-baseline-training-rows`, session `2026-10-11 11:28:52`, 24 runs named `lgbm_building | <rows> | <fold>`; all numbers below are read from these runs
 - **Model and parameters:** lgbm_building from [exp01](exp01_building.md): `LGBMRegressor`, 500 trees, learning rate 0.1, 63 leaves, everything else default
 - **Features:** the 33 shared features from [ashrae/features.py](../../ashrae/features.py) plus `building_id` as a categorical
