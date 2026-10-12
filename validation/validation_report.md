@@ -1,30 +1,28 @@
 # Validation Strategy
 
-Notebooks: [adversarial.ipynb](notebooks/adversarial.ipynb), [season_validation.ipynb](notebooks/season_validation.ipynb), [mean_vs_embedding.ipynb](notebooks/mean_vs_embedding.ipynb).
+Experiments, one card each: [exp01_adversarial](experiments/exp01_adversarial.md), [exp02_seasons](experiments/exp02_seasons.md), [exp03_mean_vs_embedding](experiments/exp03_mean_vs_embedding.md).
 
 ## Adversarial validation
 
-Adversarial validation found no feature to drop. LightGBM tells 2016 from 2017–2018 with AUC 0.75, but only 0.52 without weather, and each weather feature alone gives 0.51–0.54 ([adversarial.ipynb §1](notebooks/adversarial.ipynb)). Together the weather features act like a timestamp, so this is not a real leak.
+Adversarial validation found no feature to drop. LightGBM tells 2016 from 2017–2018 with AUC 0.75, but only 0.52 without weather, and each weather feature alone gives 0.51–0.54 ([exp01_adversarial](experiments/exp01_adversarial.md)). Together the weather features act like a timestamp, so this is not a real leak.
 
-![Adversarial validation, train vs test: feature share of gain](figures/adversarial_train_vs_test.png)
+![Feature share of gain: train vs test, and Jan–Sep vs Oct–Dec](figures/exp01_adversarial.png)
 
 ## Handout approach (failed)
 
-At first we trained on Jan–Sep and validated on Oct–Dec ([mlp.ipynb, Data](../models/notebooks/mlp.ipynb)). Adversarial validation then showed the two parts are told apart with AUC 0.92, all from weather ([adversarial.ipynb §2](notebooks/adversarial.ipynb)).
-
-![Adversarial validation, Jan–Sep vs Oct–Dec: feature share of gain](figures/adversarial_handout_split.png)
+At first we trained on Jan–Sep and validated on Oct–Dec ([exp01_outputs](../mlp/experiments/exp01_outputs.md)). Adversarial validation then showed the two parts are told apart with AUC 0.92, all from weather (right panel above, [exp01_adversarial](experiments/exp01_adversarial.md)).
 
 ## Seasonal 4-Fold
 
-After that we used four folds. Each holds out one 3-month block of 2016 and trains on the other nine months, with 2M training and 500K validation rows per fold. We compare settings by the mean over folds ([adversarial.ipynb](notebooks/adversarial.ipynb); folds in [ashrae/config.py](../ashrae/config.py#L19)). Training on months after the validation block is fine here, since the test is a later year with known weather.
+After that we used four folds. Each holds out one 3-month block of 2016 and trains on the other nine months, with 2M training and 500K validation rows per fold. We compare settings by the mean over folds ([exp01_adversarial](experiments/exp01_adversarial.md); folds in [ashrae/config.py](../ashrae/config.py#L19)). Training on months after the validation block is fine here, since the test is a later year with known weather.
 
-Each fold is scored on all rows (as Kaggle does) and on clean rows ([season_validation.ipynb](notebooks/season_validation.ipynb)). This explained why seasons differ so much:
+Each fold is scored on all rows (as Kaggle does) and on clean rows ([exp02_seasons](experiments/exp02_seasons.md)). This explained why seasons differ so much:
 
 - on all rows, validation goes from 1.12 (Oct–Dec) to 1.46 (Jan–Mar), in the same order as the share of anomalies (1.1% → 6.1%)
 - on clean rows it's only 0.93–1.04
-- for the final MLP, of the 0.37 gap between training and validation, 0.26 comes from anomaly rows in validation ([mean_vs_embedding.ipynb](notebooks/mean_vs_embedding.ipynb))
+- for the final MLP, of the 0.37 gap between training and validation, 0.26 comes from anomaly rows in validation ([exp03_mean_vs_embedding](experiments/exp03_mean_vs_embedding.md))
 
-![Training, validation and clean-row validation RMSLE per held-out season](figures/season_validation.png)
+![Training, validation and clean-row validation RMSLE per held-out season](figures/exp02_seasons.png)
 
 ## Expected correlation with the leaderboard
 

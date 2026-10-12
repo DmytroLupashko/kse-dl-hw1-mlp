@@ -15,7 +15,7 @@ Retrain each leaf count from [exp03](exp03_tree_size.md) on the 4 folds with its
 ## Setup
 
 - **Notebook:** [exp06_train_gap.ipynb](../notebooks/experiments/exp06_train_gap.ipynb)
-- **Tracking:** MLflow `ashrae-baseline-tuning`, new runs `<leaves> leaves | <fold>` with tag `stage = gap`; tree counts read from exp03's session `2026-10-11 12:25:43`, `stage = A`
+- **Tracking:** MLflow `ashrae-baseline-train_gap`, new runs `<leaves> leaves | <fold>` with tag `stage = gap`; tree counts read from `ashrae-baseline-tree_size`, exp03's session `2026-10-11 12:25:43`, `stage = A`
 - **What changes:** `num_leaves` 31, 63, 127, 255, each with its exp03 tree count
 - **What stays fixed:** everything in exp03: lgbm_building, learning rate 0.1, 2M training and 500K validation rows per fold, 4 seasonal folds, seed 0
 - **Metric:** RMSLE by tree count on training rows (500K subsample), validation all rows and validation clean rows, averaged over folds; gap = clean validation minus training at the final tree

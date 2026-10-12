@@ -81,7 +81,7 @@ Cards: [exp03 tree size](../experiments/exp03_tree_size.md), [exp04 regularizati
 | Validation | the 4 seasonal folds used everywhere; 2M training / 500K validation rows per fold |
 | Learning rate | fixed at 0.1 |
 | Number of trees | early stopping per fold: up to 5,000 trees, patience 200, on all validation rows; the trial's tree count is the mean over the folds |
-| Logging | every fold of every trial is a run in MLflow (`ashrae-baseline-tuning`): settings, best tree count, RMSLE on all and clean rows, training time, full validation curves |
+| Logging | every fold of every trial is a run in MLflow (one experiment per card, `ashrae-baseline-<slug>`): settings, best tree count, RMSLE on all and clean rows, training time, full validation curves |
 | Final model | the best trial retrained with its tree count and scored like the untuned baseline in [exp01](../experiments/exp01_building.md) |
 | Honest estimate | not separate: the same folds choose and score, so the tuned score is slightly optimistic |
 | Seeds | one per trial, seed 0 |

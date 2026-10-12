@@ -5,7 +5,14 @@
 
 ## Directories
 
-- Experiment cards: `baseline/experiments/`
-- Experiment notebooks: `baseline/notebooks/experiments/`
-- Submission notebooks: `baseline/notebooks/submissions/`
-- Figures: `baseline/figures/`
+Each section (a top-level folder with experiments: `eda/`, `validation/`, `baseline/`, `mlp/`, `ensemble/`) has:
+
+- Experiment cards: `<section>/experiments/`
+- Experiment notebooks: `<section>/notebooks/experiments/`
+- Submission notebooks: `<section>/notebooks/submissions/`
+- Figures: `<section>/figures/`
+
+## Experiments
+
+- Tracking prefix: `ashrae` (MLflow experiments `ashrae-<section>-<slug>`)
+- Jupyter: `.venv/bin/jupyter`

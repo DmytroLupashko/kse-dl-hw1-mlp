@@ -7,3 +7,5 @@ One line per change and the break it fixes (see "Experiment Skill: Approaches an
 - 2026-10-11: Results rule made concrete: figure for a trend, table for a few values, never both for the same numbers.
 - 2026-10-11: No arrows or special symbols in cards and replies.
 - 2026-10-11: Tool-independent: tracker named in a "Tools (fill in)" block at the top of SKILL.md instead of MLflow everywhere; template field "MLflow experiment" renamed "Tracking".
+- 2026-10-12: Sections (any top-level folder): section argument or inferred, numbering and "last" per section, tracking `ashrae-<section>-<slug>`; removed the duplicate `experiment_NN.md` paragraph.
+- 2026-10-12: Project details (section names, tracking prefix, Jupyter path) moved from SKILL.md to CLAUDE.md.

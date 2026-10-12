@@ -23,7 +23,7 @@ This stage ran before exp03 was split into exp03 to exp05 (20 runs), so the note
 ## Setup
 
 - **Notebook:** [exp04_regularization.ipynb](../notebooks/experiments/exp04_regularization.ipynb)
-- **Tracking:** MLflow `ashrae-baseline-tuning`, session `2026-10-11 12:25:43`, tag `stage = B` (20 runs); base from `stage = A`, `num_leaves = 127`
+- **Tracking:** MLflow `ashrae-baseline-regularization`, session `2026-10-11 12:25:43`, tag `stage = B` (20 runs); base from `ashrae-baseline-tree_size`, same session, `stage = A`, `num_leaves = 127`
 - **What changes:** `min_child_samples` 100 or 500; `colsample_bytree` 0.8; smoother `building_id` categories (`cat_smooth` 50, `min_data_per_group` 500); finer ones (`max_cat_threshold` 128)
 - **What stays fixed:** everything in exp03, with `num_leaves` 127
 - **Metric:** validation RMSLE at each fold's best tree, all rows and clean rows, averaged over folds; tree count

@@ -15,7 +15,7 @@ The 31 leaves, 1,000 trees setting is the one [exp06](exp06_train_gap.md) found 
 ## Setup
 
 - **Notebook:** [exp07_31_leaves.ipynb](../notebooks/experiments/exp07_31_leaves.ipynb)
-- **Tracking:** MLflow `ashrae-baseline-tuning`, new runs `lgbm_building_31_leaves | <fold>` with tag `stage = 31_leaves`; untuned from `ashrae-baseline-building` (`lgbm_building | <fold>`), tuned from `stage = final` with 1,736 trees
+- **Tracking:** MLflow `ashrae-baseline-31_leaves`, new runs `lgbm_building_31_leaves | <fold>` with tag `stage = 31_leaves`; untuned from `ashrae-baseline-building` (`lgbm_building | <fold>`), tuned from `ashrae-baseline-tuned` (`stage = final`), the exp06 check from `ashrae-baseline-train_gap` with 1,736 trees
 - **What changes:** 31 leaves, 1,000 trees against untuned and tuned
 - **What stays fixed:** features, learning rate 0.1, 2M training and 500K validation rows per fold, 4 seasonal folds, anomalies dropped from training only, seed 0
 - **Metric:** validation RMSLE per fold and averaged, all rows, clean rows and per meter; training RMSLE; seconds per fit

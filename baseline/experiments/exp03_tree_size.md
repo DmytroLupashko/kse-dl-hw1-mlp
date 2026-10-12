@@ -15,7 +15,7 @@ Each leaf count trains on all 4 folds with up to 5,000 trees; a fold stops after
 ## Setup
 
 - **Notebook:** [exp03_tree_size.ipynb](../notebooks/experiments/exp03_tree_size.ipynb)
-- **Tracking:** MLflow `ashrae-baseline-tuning`, session `2026-10-11 12:25:43`, tag `stage = A` (16 runs)
+- **Tracking:** MLflow `ashrae-baseline-tree_size`, session `2026-10-11 12:25:43`, tag `stage = A` (16 runs)
 - **What changes:** `num_leaves` 31, 63, 127, 255
 - **What stays fixed:** lgbm_building (33 shared features plus `building_id` as a categorical), learning rate 0.1, 2M training and 500K validation rows per fold, 4 seasonal folds of 2016, anomalies dropped from training only, seed 0
 - **Metric:** validation RMSLE at each fold's best tree, all rows and clean rows, averaged over folds; tree count and seconds per fit

@@ -15,7 +15,7 @@ Tuned is plain 127 leaves from [exp03](exp03_tree_size.md), since [exp04](exp04_
 ## Setup
 
 - **Notebook:** [exp05_tuned.ipynb](../notebooks/experiments/exp05_tuned.ipynb)
-- **Tracking:** MLflow `ashrae-baseline-tuning`, new runs `lgbm_building_tuned | <fold>` with tag `stage = final`; untuned runs from `ashrae-baseline-building`
+- **Tracking:** MLflow `ashrae-baseline-tuned`, new runs `lgbm_building_tuned | <fold>` with tag `stage = final`; settings from `ashrae-baseline-tree_size`; untuned runs from `ashrae-baseline-building`
 - **What changes:** untuned against tuned settings (127 leaves and tree count from exp03)
 - **What stays fixed:** features, learning rate 0.1, 2M training and 500K validation rows per fold, 4 seasonal folds, seed 0
 - **Metric:** validation RMSLE per fold and averaged, all rows, clean rows and per meter; training RMSLE; seconds per fit
