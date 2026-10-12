@@ -46,12 +46,12 @@ def clean_weather(w):
 
 
 def read_processed(name="train_merged.parquet", columns=None):
-    """Output of preprocessing/data_aggregation.ipynb."""
+    """Output of eda/notebooks/data_aggregation.ipynb."""
     return pd.read_parquet(PROCESSED / name, columns=columns)
 
 
 def anomaly_flags(df):
-    """The two anomaly rules of EDA §9, per row of `df` (needs building_id, meter, timestamp, meter_reading,
+    """The two anomaly rules of eda/experiments/exp04_anomalies.md, per row of `df` (needs building_id, meter, timestamp, meter_reading,
     air_temperature). Also returns the length in hours of the zero run each zero reading belongs to."""
     s = df.sort_values(["building_id", "meter", "timestamp"])
     series = s.building_id.astype(int) * 4 + s.meter.astype(int)

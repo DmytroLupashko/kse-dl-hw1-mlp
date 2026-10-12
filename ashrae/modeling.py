@@ -11,6 +11,7 @@ import torchmetrics
 from sklearn.preprocessing import StandardScaler
 from torch import nn
 from torch.utils.data import DataLoader, Dataset
+from tqdm import tqdm
 
 from .config import METERS
 
@@ -81,18 +82,18 @@ def make_loaders(train_df, val_df, X_train, X_val, batch_size=4096):
     )
 
 
-def hidden_layers(n_in, batch_norm=True, dropout=0.0, n_layers=2):
-    """`n_layers` hidden layers of 64 units; dropout goes after BatchNorm and ReLU."""
+def hidden_layers(n_in, batch_norm=True, dropout=0.0, n_layers=2, width=64):
+    """`n_layers` hidden layers of `width` units; dropout goes after BatchNorm and ReLU."""
     def block(n):
         return [
-            nn.Linear(n, 64),
-            *([nn.BatchNorm1d(64)] if batch_norm else []), # Syntax for adding layer based on codition
+            nn.Linear(n, width),
+            *([nn.BatchNorm1d(width)] if batch_norm else []), # Syntax for adding layer based on codition
             nn.ReLU(),
             *([nn.Dropout(dropout)] if dropout else []),
         ]
     return nn.Sequential(
         *block(n_in), # Input block
-        *[m for _ in range(n_layers - 1) for m in block(64)] # Append other blocks
+        *[m for _ in range(n_layers - 1) for m in block(width)] # Append other blocks
     )
 
 
@@ -200,15 +201,17 @@ class MeterMLP(nn.Module):
     """One output per meter type; with `n_buildings`, a learned `emb_dim`-number vector per building is added to
     the input."""
 
-    def __init__(self, n_features, n_buildings=0, emb_dim=16, dropout=0.0, n_layers=2):
+    def __init__(self, n_features, n_buildings=0, emb_dim=16, dropout=0.0, n_layers=2, batch_norm=False, width=64):
         super().__init__()
         self.emb = nn.Embedding(n_buildings, emb_dim) if n_buildings else None
         self.hidden = hidden_layers(
             n_features + (emb_dim if n_buildings else 0),
+            batch_norm=batch_norm,
             dropout=dropout,
             n_layers=n_layers,
+            width=width,
         )
-        self.out = nn.Linear(64, len(METERS))
+        self.out = nn.Linear(width, len(METERS))
 
     def forward(self, x, meter, building):
         if self.emb is not None:
@@ -266,6 +269,31 @@ class EnergyModel(L.LightningModule):
             ],
             lr=self.hparams.lr,
         )
+
+
+class Progress(L.Callback):
+    """A progress bar over all training batches of a run, with the validation RMSLE after each epoch."""
+
+    def __init__(self, desc):
+        self.desc, self.best = desc, {"score": np.inf, "epoch": 0}
+
+    def on_train_start(self, trainer, model):
+        self.bar = tqdm(total=trainer.max_epochs * trainer.num_training_batches, desc=self.desc, unit="batch",
+                        dynamic_ncols=True)
+
+    def on_train_batch_end(self, trainer, model, outputs, batch, batch_idx):
+        self.bar.update(1)
+
+    def on_validation_epoch_end(self, trainer, model):
+        if trainer.sanity_checking:
+            return
+        score, epoch = trainer.callback_metrics["val_rmsle"].item(), trainer.current_epoch + 1
+        if score < self.best["score"]:
+            self.best.update(score=score, epoch=epoch)
+        self.bar.set_postfix_str(f"epoch {epoch}, val {score:.4f}, best {self.best['score']:.4f} at {self.best['epoch']}")
+
+    def on_train_end(self, trainer, model):
+        self.bar.close()
 
 
 @torch.no_grad()

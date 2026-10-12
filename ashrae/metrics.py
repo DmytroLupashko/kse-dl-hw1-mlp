@@ -1,4 +1,4 @@
-"""RMSLE, computed from log1p values. Kept free of torch so LightGBM notebooks can import it (EDA, adversarial)."""
+"""RMSLE, computed from log1p values. Kept free of torch so LightGBM notebooks can import it (eda, adversarial validation)."""
 import numpy as np
 
 from .config import METERS
