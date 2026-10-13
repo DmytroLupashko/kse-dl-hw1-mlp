@@ -14,7 +14,7 @@ At first we trained on Jan–Sep and validated on Oct–Dec ([exp01_outputs](../
 
 ## Seasonal 4-Fold
 
-After that we used four folds. Each holds out one 3-month block of 2016 and trains on the other nine months, with 2M training and 500K validation rows per fold. We compare settings by the mean over folds ([exp01_adversarial](experiments/exp01_adversarial.md); folds in [ashrae/config.py](../ashrae/config.py#L19)). Training on months after the validation block is fine here, since the test is a later year with known weather.
+After that we used four folds. Each holds out one 3-month block of 2016 and trains on the other nine months, with 2M training and 500K validation rows per fold. We compare settings by the mean over folds ([exp01_adversarial](experiments/exp01_adversarial.md); folds in [ashrae/config.py](../ashrae/config.py#L13)). Training on months after the validation block is fine here, since the test is a later year with known weather.
 
 Each fold is scored on all rows (as Kaggle does) and on clean rows ([exp02_seasons](experiments/exp02_seasons.md)). This explained why seasons differ so much:
 

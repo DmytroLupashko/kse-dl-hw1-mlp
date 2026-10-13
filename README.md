@@ -22,12 +22,13 @@ Each section has a report and its notebooks:
 ## Project structure
 
 ```text
-├── ashrae/          shared code: paths, data loading, features, models, MLflow tracking
-├── eda/             eda_report.md, experiments/, notebooks/experiments/, notebooks/data_aggregation.ipynb, figures/
-├── validation/      validation_report.md, experiments/, notebooks/experiments/, figures/
-├── baseline/        baseline_report.md, experiments/ (one card per experiment), notebooks/experiments/, notebooks/submissions/ (untuned, tuned, 31 leaves)
-├── mlp/             mlp_report.md, experiments/ (one card per experiment), notebooks/experiments/, notebooks/submissions/, figures/
-├── ensemble/        ensemble_report.md, experiments/, notebooks/experiments/, notebooks/submissions/, figures/
+├── ashrae/          project-wide plumbing no section owns: paths, processed data, features, metrics, MLflow tracking, submissions;
+│                    code whose subject is a section is in that section's src/, imported by other sections as <section>.src
+├── eda/             eda_report.md, src/, experiments/, notebooks/experiments/, notebooks/data_aggregation.ipynb, figures/
+├── validation/      validation_report.md, src/, experiments/, notebooks/experiments/, figures/
+├── baseline/        baseline_report.md, src/, experiments/ (one card per experiment), notebooks/experiments/, notebooks/submissions/ (untuned, tuned, 31 leaves)
+├── mlp/             mlp_report.md, src/, experiments/ (one card per experiment), notebooks/experiments/, notebooks/submissions/, figures/
+├── ensemble/        ensemble_report.md, src/, experiments/, notebooks/experiments/, notebooks/submissions/, figures/
 ├── docs/            assignment PDF, development guide
 ├── ai_usage/        AI chat transcripts
 └── data/            Kaggle data (not in git)

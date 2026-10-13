@@ -16,7 +16,7 @@ Plot daily, hourly and weekday profiles of `log1p(meter_reading)` per meter type
 
 - **Notebook:** [exp02_time_zones.ipynb](../notebooks/experiments/exp02_time_zones.ipynb)
 - **Tracking:** none
-- **What changes:** weather timestamps raw or shifted by the site's UTC offset (`UTC_OFFSET` in [ashrae/config.py](../../ashrae/config.py)); hour shift of each site's electricity profile, -12 to 11 h
+- **What changes:** weather timestamps raw or shifted by the site's UTC offset (`UTC_OFFSET` in [eda/src/raw_data.py](../src/raw_data.py)); hour shift of each site's electricity profile, -12 to 11 h
 - **What stays fixed:** all 2016 training readings; electricity profiles use positive readings relative to each building's mean; every profile standardized per site
 - **Metric:** hour of the temperature peak per site; correlation of a site's electricity profile with the other sites' average, unshifted and at the best shift
 

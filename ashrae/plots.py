@@ -1,10 +1,16 @@
-"""Plots used by more than one notebook."""
+"""The look shared by the figures of every section."""
+INK, TEXT, MUTED, GRID, SURFACE = "#0b0b0b", "#52514e", "#898781", "#e1e0d9", "#fcfcfb"
 
 
-def plot_curves(ax, curves, title, **plot_kw):
-    """One line per entry of `curves` ({label: value per epoch}), on an axis of epochs."""
-    n_epochs = max(len(values) for values in curves.values())
-    for label, values in curves.items():
-        ax.plot(range(1, len(values) + 1), values, marker="o", label=label, **plot_kw)
-    ax.set(title=title, xlabel="epoch", xticks=range(1, n_epochs + 1))
-    ax.legend(fontsize=8)
+def style_axis(ax):
+    """The shared look: light surface, horizontal grid only, no frame but the bottom spine, muted ticks."""
+    ax.set_facecolor(SURFACE)
+    ax.grid(axis="y", color=GRID, lw=0.75)
+    ax.set_axisbelow(True)
+
+    ax.spines[["top", "right", "left"]].set_visible(False)
+    ax.spines["bottom"].set_color("#c3c2b7")
+
+    ax.tick_params(colors=MUTED, labelcolor=TEXT, length=0, pad=6)
+    ax.xaxis.label.set_color(TEXT)
+    ax.yaxis.label.set_color(TEXT)

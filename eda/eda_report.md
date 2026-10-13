@@ -88,7 +88,7 @@ The same features are built for training, validation and test ([ashrae/features.
 ### Target transformations
 
 - We predict `log1p(meter_reading)` with MSE loss. RMSLE is just RMSE on `log1p`, so the loss is the metric ([exp03_metric](experiments/exp03_metric.md)). Also, `log1p` of the reading is bell-shaped, which is a good sign.
-- Predictions are clipped at 0 ([ashrae/modeling.py](../ashrae/modeling.py)).
+- Predictions are clipped at 0 ([mlp/src/predict.py](../mlp/src/predict.py)).
 - Site 0 electricity is converted from kBTU to kWh for training and back for the submission ([data_aggregation.ipynb §1](notebooks/data_aggregation.ipynb)).
 
 ## EDA step by step
