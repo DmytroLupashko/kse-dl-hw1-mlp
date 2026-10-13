@@ -4,7 +4,7 @@
 
 - [x] Set up a clean environment (fresh `.venv` from `pyproject.toml` / `poetry.lock`, register Jupyter kernel, check every notebook runs from scratch)
 
-- [ ] Code is refactored
+- [x] Code is refactored
 ## EDA and Metric Analysis
 
 - [x] Perform Exploratory Data Analysis (EDA)
@@ -32,8 +32,8 @@
 - [x]  Refactor DL environment to match baseline
 - [x]  Do dedicated feature engineering and preprocessing for the DL model
 - [x] Build a DL model beyond a plain MLP (multi-branch inputs/outputs, auxiliary losses, categorical embeddings, …)
-- [ ] Implement a custom layer with `nn.Module` + `nn.Parameter`
-- [ ] Implement an optimizer with `torch.optim.Optimizer
+- [x] Implement a custom layer with `nn.Module` + `nn.Parameter`
+- [x] Implement an optimizer with `torch.optim.Optimizer
 
 - [x] Regularization: Batch/Layer Norm
 - [x] Regularization: Dropout 
