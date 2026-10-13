@@ -99,7 +99,7 @@ bf16 keeps float32's range, so it rarely needs loss scaling; fp16 needs it (Ligh
 
 ## Worked Example: ASHRAE Great Energy Predictor III
 
-Homework 1 ([mlp.ipynb](../../models/notebooks/mlp.ipynb)) trains its MLPs with Lightning and tracks them in MLflow. How it maps to this guide:
+Homework 1 ([exp01_outputs](../../mlp/experiments/exp01_outputs.md)) trains its MLPs with Lightning and tracks them in MLflow. How it maps to this guide:
 
 - **Data flow:** 3M rows × 33 features fit in memory — the tabular exception in §2. The Dataset keeps them as tensors and implements `__getitems__`, so each batch is one indexing step while the DataLoader still shuffles and batches; the collator just passes the batch through.
 - **One module, many networks:** every network takes the same inputs `(x, meter, building)`, so a single `LightningModule` trains all five MLPs with `torchmetrics` RMSLE.

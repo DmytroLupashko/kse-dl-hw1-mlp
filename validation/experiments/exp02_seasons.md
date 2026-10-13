@@ -10,7 +10,7 @@ How much of the spread between seasonal folds in validation RMSLE of mlp_4out_me
 
 ## Plan
 
-Validation RMSLE ranged from 1.05 (Jul–Sep) to 1.42 (Jan–Mar) in [mlp exp14_regularization](../../mlp/experiments/exp14_regularization.md), and anomalies are far more common in Jan–May than in Nov–Dec. Anomalies are dropped from training only, so train mlp_4out_mean_bn on each fold and score its validation predictions on all rows and on clean rows; the difference is what anomalies cost.
+Anomalies are far more common in Jan–May than in Nov–Dec. Anomalies are dropped from training only, so train mlp_4out_mean_bn on each fold and score its validation predictions on all rows and on clean rows; the difference is what anomalies cost.
 
 ## Setup
 

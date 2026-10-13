@@ -1,9 +1,10 @@
 # AI301 Deep Learning — Assignment #1: TODO
 
-## Setup
+## General
 
 - [x] Set up a clean environment (fresh `.venv` from `pyproject.toml` / `poetry.lock`, register Jupyter kernel, check every notebook runs from scratch)
 
+- [ ] Code is refactored
 ## EDA and Metric Analysis
 
 - [x] Perform Exploratory Data Analysis (EDA)
@@ -28,17 +29,25 @@
 
 ## Deep Learning Model
 
-- [x] Do dedicated feature engineering and preprocessing for the DL model
+- [x]  Refactor DL environment to match baseline
+- [x]  Do dedicated feature engineering and preprocessing for the DL model
 - [x] Build a DL model beyond a plain MLP (multi-branch inputs/outputs, auxiliary losses, categorical embeddings, …)
 - [ ] Implement a custom layer with `nn.Module` + `nn.Parameter`
-- [ ] Implement an optimizer with `torch.optim.Optimizer`
-- [ ] Try regularization: Batch/Layer Norm, Dropout, Weight Decay, LR schedulers
-- [ ] Collect results: loss/metric curves, gradient flow visualizations, parameter tuning logs
+- [ ] Implement an optimizer with `torch.optim.Optimizer
+
+- [x] Regularization: Batch/Layer Norm
+- [x] Regularization: Dropout 
+- [x] Regularization: Weight Decay
+- [x] Regularization: LR schedulers
+
 - [x] Submit predictions; compare Private/Public LB with local validation
 - [x] Conclude whether the model is adequate
-- [ ] From 
+- [x] From 
 Pavlo: tune parameters of optimizers, collect the results
-- [ ] Try different size of layers
+- [x] Try different size of layers
+- [x] Try different Batch Sizes
+- [x] Try different depth sizes
+
 ## Ensembling
 
 - [x] Combine the baseline and DL models into an ensemble

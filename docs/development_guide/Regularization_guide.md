@@ -83,7 +83,7 @@ The aim is different from ordinary regularization: make the model rely on relati
 
 ## Worked Example: ASHRAE Great Energy Predictor III
 
-Homework 1: predict hourly energy use of ~1,450 buildings; see [EDA.ipynb](../../eda/notebooks/EDA.ipynb), [mlp.ipynb](../../models/notebooks/mlp.ipynb) and [adversarial.ipynb](../../validation/notebooks/adversarial.ipynb).
+Homework 1: predict hourly energy use of ~1,450 buildings; see [eda report](../../eda/eda_report.md), [exp02_building](../../mlp/experiments/exp02_building.md) and [exp01_adversarial](../../validation/experiments/exp01_adversarial.md).
 
 - **Diagnosis:** the best MLP (4 meter outputs + a 16-dimensional building embedding) reaches training RMSLE 0.80 but validation 1.11: clear overfitting.
 - **Label cleaning came first, and paid most.** Before zero-electricity readings were removed, the building-identity models got *worse* on validation after epoch 1: they had memorized that some buildings use no power. After cleaning, validation improved every epoch and RMSLE fell from 1.365 to 1.108.
@@ -96,7 +96,6 @@ Homework 1: predict hourly energy use of ~1,450 buildings; see [EDA.ipynb](../..
   5. heating/cooling degree-hours and 24-hour / 7-day rolling temperature per site;
   6. retrain on all of 2016 and average the fold models.
 - **Success looks like:** mean fold RMSLE falls, the spread across folds shrinks, and the train–validation gap narrows.
-- **Result** ([regularization_test.ipynb](../../models/notebooks/regularization_test.ipynb)): on four seasonal folds, weight decay, dropout, a smaller embedding and their combination all failed to improve validation (best: none, 1.200). Validation was still improving at epoch 10, so the gap wasn't classic overfitting but the difference between seasons (1.05–1.42 across folds). Dropout alone would have looked like a win on October–December only. Lesson: diagnose with §1 first — here the fix is seasonal features (§4), not a penalty.
 
 ---
 

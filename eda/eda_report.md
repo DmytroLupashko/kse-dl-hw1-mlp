@@ -31,8 +31,8 @@ Extra metrics we track:
 
 - RMSLE on clean rows, to see the error on real consumption ([exp02_seasons](../validation/experiments/exp02_seasons.md))
 - RMSLE per meter type, since electricity and hot water differ by 0.6 ([exp01_outputs](../mlp/experiments/exp01_outputs.md))
-- spread over the four folds: a change must help in at least 3 of 4 seasons ([exp16_layers](../mlp/experiments/exp16_layers.md))
-- residual correlation between models, to see how much an ensemble can gain ([exp01_blend](../ensemble/experiments/exp01_blend.md))
+- spread over the four folds: a change must help in at least 3 of 4 seasons
+- residual correlation between models, to see how much an ensemble can gain
 
 Alternative target metric: CV(RMSE) per building x meter series, averaged over series. The competition is about estimating energy savings after retrofits, which needs errors in kWh. ASHRAE Guideline 14 uses CV(RMSE) for this. Averaging per series keeps big buildings from dominating, and zeros don't blow it up. We haven't computed it on our models.
 
