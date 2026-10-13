@@ -22,19 +22,31 @@ Each section has a report and its notebooks:
 ## Project structure
 
 ```text
-├── ashrae/          project-wide plumbing no section owns: paths, processed data, features, metrics, MLflow tracking, submissions;
-│                    code whose subject is a section is in that section's src/, imported by other sections as <section>.src
-├── eda/             eda_report.md, src/, experiments/, notebooks/experiments/, notebooks/data_aggregation.ipynb, figures/
-├── validation/      validation_report.md, src/, experiments/, notebooks/experiments/, figures/
-├── baseline/        baseline_report.md, src/, experiments/ (one card per experiment), notebooks/experiments/, notebooks/submissions/ (untuned, tuned, 31 leaves)
-├── mlp/             mlp_report.md, src/, experiments/ (one card per experiment), notebooks/experiments/, notebooks/submissions/, figures/
-├── ensemble/        ensemble_report.md, src/, experiments/, notebooks/experiments/, notebooks/submissions/, figures/
-├── docs/            assignment PDF, development guide
-├── ai_usage/        AI chat transcripts
-└── data/            Kaggle data (not in git)
+├── eda/            1. EDA and preprocessing
+├── validation/     2. Validation strategy
+├── baseline/       3. LightGBM baseline
+├── mlp/            4. MLP
+├── ensemble/       5. Blend and final submission
+├── ashrae/         shared code: paths, data, features, metrics, MLflow tracking, submissions
+├── docs/           assignment and development guide
+├── ai_usage/       AI chat transcripts
+└── data/           Kaggle data (not in git)
 ```
 
-Run [data_aggregation.ipynb](eda/notebooks/data_aggregation.ipynb) first: it builds `data/processed/`, which every other notebook reads. MLflow runs are in `mlflow.db`.
+Every section folder has the same layout:
+
+```text
+<section>/
+├── <section>_report.md     the section's report
+├── experiments/            one card per experiment
+├── notebooks/
+│   ├── experiments/        one notebook per card
+│   └── submissions/        notebooks that write a Kaggle submission
+├── figures/                figures used in the report
+└── src/                    the section's own code
+```
+
+Validation and EDA have no submissions; EDA also has [data_aggregation.ipynb](eda/notebooks/data_aggregation.ipynb), which builds `data/processed/` and must run first, since every other notebook reads it. A section's code is imported as `src` by its own notebooks and as `<section>.src` by the others, so `ashrae/` keeps only what no section owns. All MLflow runs are in `mlflow.db`.
 
 ## AI usage
 
