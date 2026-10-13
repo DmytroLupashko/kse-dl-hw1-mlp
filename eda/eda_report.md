@@ -1,167 +1,85 @@
 # EDA and Preprocessing
 
-Experiments, one card each: [exp01_overview](experiments/exp01_overview.md), [exp02_time_zones](experiments/exp02_time_zones.md), [exp03_metric](experiments/exp03_metric.md), [exp04_anomalies](experiments/exp04_anomalies.md). [data_aggregation.ipynb](notebooks/data_aggregation.ipynb) builds the training and test tables.
+The analysis is split into four experiment cards: [exp01_overview](experiments/exp01_overview.md) profiles the raw tables, [exp02_time_zones](experiments/exp02_time_zones.md) looks at time patterns and the clock mismatch between weather and meters, [exp03_metric](experiments/exp03_metric.md) studies RMSLE, and [exp04_anomalies](experiments/exp04_anomalies.md) tests which broken-meter rows to drop. [data_aggregation.ipynb](notebooks/data_aggregation.ipynb) applies the decisions and builds the training and test tables. Every section below states a finding, shows the figure it rests on, and ends with what it changed in the pipeline.
 
-## Data insights
+## The data
 
-Details per experiment are in [EDA step by step](#eda-step-by-step).
+The training set covers 2016 hourly: 20.2M readings from 2,380 building × meter series, 1,449 buildings at 16 sites. Most buildings are simple. 875 of them have a single meter, almost always electricity, and electricity makes up 60% of all rows. We therefore keep one row per building × meter × hour instead of a column per meter type, which would be mostly empty. The tables are clean in the structural sense: there are no duplicate keys, and the weather is missing at most 330 hours at any site.
 
-- 20.2M hourly readings from 2,380 building x meter series. 875 of 1,449 buildings have only one meter, almost always electricity.
-- The target is very skewed: one steam meter (building 1099) has 78% of all energy. On a log scale it looks fine.
-- Zeros are common: 27% of hot water readings, 16% of chilled water, 13% of steam and 4% of electricity.
-- Chilled water peaks in summer, steam and hot water in winter. Use drops at night and at weekends.
+## The target
 
-## Metric
+`meter_reading` is extremely skewed. A single steam meter, building 1099, accounts for 78% of all energy in the training set, and the raw histogram is a spike at zero with a long tail up to 2·10⁷. On a `log1p` scale each meter type becomes a single hump around 4 to 6, plus a separate peak at exactly zero.
 
-RMSLE measures relative error: a 10% miss costs about 0.095 at any scale. But it is harsh near zero: predicting 5 for a true 0 costs 1.79 ([exp03_metric](experiments/exp03_metric.md)).
+![Raw meter_reading and log1p(meter_reading) by meter type](figures/exp01_overview_target.png)
 
-Good:
+That zero peak is large: 27% of hot water readings, 16% of chilled water, 13% of steam and 4% of electricity are zero. Some are real (heating is off in summer), but a building never uses no electricity at all, so many zeros are outages, which is the subject of [the anomaly section](#broken-meters).
 
-- big buildings don't dominate the score
-- it's plain MSE on `log1p`, so we can train on the metric directly
+We predict `log1p(meter_reading)` with MSE loss. Since RMSLE is RMSE on `log1p` values, the loss is the competition metric ([exp03_metric](experiments/exp03_metric.md)). Predictions are clipped at 0 ([mlp/src/predict.py](../mlp/src/predict.py)). Site 0 electricity is reported in kBTU, not kWh, so it is converted for training and converted back for the submission ([data_aggregation.ipynb §1](notebooks/data_aggregation.ipynb)).
 
-Bad:
+## What drives consumption
 
-- zeros are expensive, and many zeros are broken meters, so partly the score is about guessing outages
-- it doesn't care whether errors cancel out over a day or a year
-- negative predictions are undefined (we clip at 0)
-- a unit mix-up becomes a big constant error (site 0 electricity is in kBTU)
+Floor area is the strongest building feature, with Spearman ρ = 0.68 against electricity, and it is bell-shaped on a log scale, so it enters the model as `log1p(square_feet)`. Weather matters through temperature, but in opposite directions: chilled water rises with temperature (ρ = 0.43) while steam and hot water fall (ρ ≈ −0.45). Precipitation and cloud coverage are nearly unrelated to any meter, with |ρ| of at most 0.17.
 
-Extra metrics we track:
+![Spearman correlation with log1p(reading), per meter type](figures/exp01_overview.png)
 
-- RMSLE on clean rows, to see the error on real consumption ([exp02_seasons](../validation/experiments/exp02_seasons.md))
-- RMSLE per meter type, since electricity and hot water differ by 0.6 ([exp01_outputs](../mlp/experiments/exp01_outputs.md))
-- spread over the four folds: a change must help in at least 3 of 4 seasons
-- residual correlation between models, to see how much an ensemble can gain
+Correlation hides the shape, so we also plotted the mean reading against air temperature. Steam and hot water fall almost linearly from −30 °C to 40 °C, chilled water climbs steeply from about 0 °C and peaks around 30 °C, and electricity is U-shaped, with its minimum around 10 °C. A model has to combine meter type with weather, since the same temperature means opposite things for heating and cooling.
 
-Alternative target metric: CV(RMSE) per building x meter series, averaged over series. The competition is about estimating energy savings after retrofits, which needs errors in kWh. ASHRAE Guideline 14 uses CV(RMSE) for this. Averaging per series keeps big buildings from dominating, and zeros don't blow it up. We haven't computed it on our models.
+![Mean log1p(reading) against air temperature, per meter type](figures/exp01_overview_temperature.png)
 
-## Preprocessing
+The same split shows up over the year. Chilled water peaks in July and August, while steam and hot water peak in winter. Electricity is flat across seasons apart from a step at the end of May, which coincides with site 0's electricity meters starting to report after months of zeros (building 0 in the [anomaly figure](#broken-meters) is one of them). The weekly ripple in every series is the weekend dip.
 
-We based our data cleaning on three prior write-ups:
+![Daily mean log1p(meter_reading) per meter type over 2016](figures/exp02_time_zones_seasons.png)
 
-- the data-cleaning approach of a top ASHRAE solution ([1](../README.md#references))
-- the anomaly-correction approach of a BirdCLEF solution ([2](../README.md#references))
-- site and building identification via internet search ([3](../README.md#references))
+Within a day, use rises in the morning and falls at night, and Saturday and Sunday are lower than weekdays for electricity and chilled water. This is why the model gets hour of day and day of week as sin/cos features, computed in local time.
 
-With Handout validation this looked like a big boost, but with the 4-fold seasonal validation it is only a small change ([exp02_building](../mlp/experiments/exp02_building.md)).
+![Mean log1p(reading) by hour of day and by day of week](figures/exp02_time_zones_hours.png)
 
-### Local time zone correction
+## Missing values
 
-As noted on the [competition forum](https://www.kaggle.com/c/ashrae-energy-prediction/discussion/115698), weather timestamps are UTC, while meter timestamps are local. We checked it on our data: after shifting weather to each site's local time, temperature peaks at 14:00–16:00 everywhere. Site 14 is the exception, its meters are in UTC too ([exp02_time_zones](experiments/exp02_time_zones.md)).
+Missing data is concentrated in a few columns and comes site by site rather than at random. `floor_count` is missing for 76% of buildings (83% of rows) and `year_built` for 53% of buildings (60% of rows), and in both cases whole sites report nothing. In the weather, cloud coverage is missing in 49% of rows and precipitation in 36%, and the heatmap shows that sites 1, 5, 7, 11 and 12 never report one or the other, while site 5 also never reports sea level pressure.
 
-The fix improved the LightGBM baseline from 1.290 to 1.286, and no fold got worse ([exp04_anomalies](experiments/exp04_anomalies.md)).
+![Weather: % missing per site and column](figures/exp01_overview_missing.png)
 
-### Remove anomalies
+Because cloud coverage and precipitation are both sparse and barely related to the target, they are dropped, and so is `floor_count`. `year_built` is kept, filled with the training median plus a "missing" flag ([data_aggregation.ipynb §3](notebooks/data_aggregation.ipynb)). The remaining weather columns (air and dew temperature, sea level pressure) are interpolated linearly in time within each site. A site that never reports a column gets the mean of the other sites at the same hour. Wind direction is turned into sin and cos before interpolation, so that 359° and 1° do not average to 180° ([data_aggregation.ipynb §2](notebooks/data_aggregation.ipynb), [eda/src/raw_data.py](src/raw_data.py)).
 
-Some meters are broken: zeros for long periods, spikes, the same value for days, etc. We remove three kinds of rows ([exp04_anomalies](experiments/exp04_anomalies.md)):
+## Time zones
 
-- every zero electricity reading, since a building always uses some power
-- steam or hot water at 0 for a week or more while the week is cold (below 10 °C)
-- chilled water at 0 for a week or more while the week is warm (above 20 °C)
+As noted on the [competition forum](https://www.kaggle.com/c/ashrae-energy-prediction/discussion/115698), weather timestamps are in UTC while meter timestamps are local. Our data confirms it. With raw timestamps, temperature peaks at 13:00–15:00 at the UTC±0 sites but around 20:00 at the American sites, which is impossible for local afternoon heat. After shifting each site by its UTC offset, temperature peaks at 14:00–16:00 everywhere. Electricity, plotted with its raw timestamps, already peaks during the working day, which shows the meters are on local time.
 
-This is 599,086 rows, 3.0% of the training data. We drop them from training only and still validate on all rows, because the Kaggle test set has broken meters as well ([data_aggregation.ipynb §4](notebooks/data_aggregation.ipynb)).
+![Hourly temperature and electricity profiles per site, raw and shifted](figures/exp02_time_zones.png)
 
-On clean rows this helps a lot: LightGBM goes from 1.140 to 1.048. On all rows, as Kaggle scores, it barely moves (1.286 → 1.281). Jan–Mar and Apr–Jun actually get worse, because a model that learned a meter's zeros wins when the outage goes on into the validation months. We still drop the anomalies.
+Site 14 is the exception. Its electricity profile lines up with the other sites only after a +5 h shift, exactly its offset (correlation 0.24 → 0.99), so its meters are in UTC as well and its weather is left unshifted. With this fix the LightGBM baseline goes from 1.290 to 1.286 averaged over the four seasonal folds, and no fold gets worse ([exp04_anomalies](experiments/exp04_anomalies.md)).
 
-### Removed features
+## Broken meters
 
-- floor count: missing for 83% of rows ([data_aggregation.ipynb §3](notebooks/data_aggregation.ipynb))
-- precipitation and cloud coverage: often missing and barely related to the target ([exp01_overview](experiments/exp01_overview.md))
+Our cleaning follows three prior write-ups: the data-cleaning approach of a top ASHRAE solution ([1](../README.md#references)), the anomaly-correction approach of a BirdCLEF solution ([2](../README.md#references)), and identifying sites and buildings by internet search ([3](../README.md#references)).
 
-### Filled-in features
+Some series are plainly broken. Building 0 reports zero electricity from January to late May and then a normal load of 60–90 kWh. Building 1303 reports zero steam from mid-January to June, through the coldest weeks of the year, which a heated building cannot do.
 
-- year_built: filled with the training median, plus a "missing" flag, since 60% of rows don't have it ([data_aggregation.ipynb §3](notebooks/data_aggregation.ipynb))
-- air / dew temperature and sea level pressure: interpolated linearly over time within each site. A site that never reports a column (site 5 has no pressure) gets the mean of the other sites at the same hour ([data_aggregation.ipynb §2](notebooks/data_aggregation.ipynb))
-- wind direction: turned into sin/cos, then interpolated linearly ([ashrae/features.py](../ashrae/features.py))
+![Two flagged series: zero electricity at building 0, and steam off in the cold at building 1303](figures/exp04_anomalies_examples.png)
 
-### Feature Engineering
+From this we drop two kinds of training rows. The first is every zero electricity reading. The second is "off when needed": steam or hot water at zero for a week or more while that week averages below 10 °C, or chilled water at zero for a week or more above 20 °C. Together that is 599,086 rows, 3.0% of the training data ([data_aggregation.ipynb §4](notebooks/data_aggregation.ipynb)). The rows are dropped from training only. Validation keeps them, because the Kaggle test set contains broken meters as well.
 
-The same features are built for training, validation and test ([ashrae/features.py](../ashrae/features.py)):
+The effect depends on what we score. On clean validation rows dropping anomalies helps in every fold, and the four-fold average falls from 1.140 to 1.048. On all rows, which is how Kaggle scores, the average barely moves (1.286 → 1.281): Jul–Sep and Oct–Dec improve, but Jan–Mar and Apr–Jun get worse. In those folds the broken meters are still broken during the validation months, so a model that has learned a meter's zeros wins. Scoring only Oct–Dec (1.383 → 1.168) would have overstated the gain. We keep the drop, because it makes the model learn real consumption, and anomaly rows that stay in validation cost up to 0.48 RMSLE per fold ([exp02_seasons](../validation/experiments/exp02_seasons.md)).
 
-- `log1p(square_feet)`: floor area is the strongest building feature (ρ = 0.68 with electricity) ([exp01_overview](experiments/exp01_overview.md))
-- weather: air and dew temperature, pressure, wind speed and direction (sin/cos)
-- hour and day of week as sin/cos, in local time
-- one-hot `meter` and `primary_use`
-- building identity: either a learned 16-number embedding per building, or the mean `log1p` reading of each building x meter series ([exp02_building](../mlp/experiments/exp02_building.md))
+![Validation RMSLE per fold with no rows dropped and with both rules dropped, on all rows and on clean rows](figures/exp04_anomalies.png)
 
-### Target transformations
+Shorter cut-offs for the electricity rule worked better than longer ones: dropping only zero runs of 720+ hours gives 1.095 on clean rows, against 1.061 for dropping every zero, since even a few hours of zeros teach the model that a building can use no power. Two further rules did not help. Stuck meters (the same non-zero value for 48+ hours) and spikes (more than 10× the series' daily median) change the four-fold average by at most 0.003 on top of the two rules, and the spike rule mostly flagged normal on/off cycling, so both were left out.
 
-- We predict `log1p(meter_reading)` with MSE loss. RMSLE is just RMSE on `log1p`, so the loss is the metric ([exp03_metric](experiments/exp03_metric.md)). Also, `log1p` of the reading is bell-shaped, which is a good sign.
-- Predictions are clipped at 0 ([mlp/src/predict.py](../mlp/src/predict.py)).
-- Site 0 electricity is converted from kBTU to kWh for training and back for the submission ([data_aggregation.ipynb §1](notebooks/data_aggregation.ipynb)).
+Under the seasonal four-fold validation the preprocessing as a whole turned out to be a small change, although the earlier hold-out validation had made it look like a big boost ([exp02_building](../mlp/experiments/exp02_building.md)).
 
-## EDA step by step
+## The metric
 
-Each part: what we found → what it changes, with the card it comes from.
+RMSLE measures relative error. A 10% miss costs about 0.095 whether the true value is 100 or 10,000, so the few huge series do not dominate the score, which is what the competition wants. In the plot below each true value gives the same V shape on a log axis, just moved sideways.
 
-### Data overview ([exp01_overview](experiments/exp01_overview.md))
+![RMSLE of one prediction against the predicted value, for true values 0, 100 and 10,000](figures/exp03_metric.png)
 
-- 2016, hourly: 20.2M readings from 2,380 building × meter series.
-- 875 of 1,449 buildings have one meter, almost always electricity (60% of rows).
-- → Keep one row per building × meter × hour; a column per meter type would be mostly empty.
+The weakness is near zero. The red curve has no room to the left: predicting 5 for a true 0 costs 1.79, nineteen times a 10% miss. Since many zeros are broken meters, part of the score is really about guessing outages. RMSLE also ignores whether errors cancel out over a day or a year, is undefined for negative predictions (hence the clip at 0), and turns a unit mix-up such as site 0's kBTU into a large constant error.
 
-### Data quality ([exp01_overview](experiments/exp01_overview.md))
+To see past these effects we track three more numbers next to the score. RMSLE on clean rows shows the error on real consumption ([exp02_seasons](../validation/experiments/exp02_seasons.md)). RMSLE per meter type matters because electricity and hot water differ by 0.6 ([exp01_outputs](../mlp/experiments/exp01_outputs.md)). The spread across the four folds sets the bar for changes: a change has to help in at least three of four seasons. For ensembles we also look at the residual correlation between models, which bounds what blending can gain.
 
-- Missing: `floor_count` 76% and `year_built` 53% of buildings; cloud coverage 49% and precipitation 36% of weather
-  rows. Site 5 never reports pressure. Up to 330 hours missing at a site. No duplicates.
-- → Fill weather gaps within each site; use other sites only when a site has no data for a column.
+A better-suited target metric would be CV(RMSE) per building × meter series, averaged over series. The competition is about estimating energy savings after retrofits, which needs errors in kWh, and ASHRAE Guideline 14 uses CV(RMSE) for exactly this. Averaging per series keeps big buildings from dominating, and zeros do not blow it up. We have not computed it for our models.
 
-### Building metadata ([exp01_overview](experiments/exp01_overview.md))
+## Model inputs
 
-- Education (549) and office (279) dominate. Floor area is bell-shaped on a log scale.
-- Missing `year_built` / `floor_count` depends on the site: whole sites report none.
-- → Use `log1p(square_feet)`.
-
-### Target ([exp01_overview](experiments/exp01_overview.md))
-
-- Extremely skewed: one steam meter (building 1099) holds 78% of all energy. Well-behaved on a log scale.
-- Zeros: 27% of hot water, 16% of chilled water, 13% of steam, 4% of electricity readings.
-- → Target is `log1p(meter_reading)`.
-
-### Temporal patterns ([exp02_time_zones](experiments/exp02_time_zones.md))
-
-- Chilled water peaks in summer, steam and hot water in winter. Use is lower at night and at weekends.
-- → Hour and day-of-week features; the model must combine meter type with weather.
-
-### Time zones ([exp02_time_zones](experiments/exp02_time_zones.md))
-
-- Weather timestamps are UTC, meter timestamps local (site 14: UTC too). Checked on our data: after shifting, the
-  temperature peaks at 14:00–16:00 at every site.
-- → Shift weather by the site's UTC offset before merging (not at site 14). LightGBM, 4-fold average: 1.290 → 1.286
-  (clean rows 1.147 → 1.140); no fold gets worse.
-
-### Features vs target ([exp01_overview](experiments/exp01_overview.md))
-
-- Floor area is the strongest building feature (Spearman ρ = 0.68 for electricity).
-- Temperature: chilled water up (ρ = 0.43), steam and hot water down (ρ ≈ −0.45).
-- → Drop precipitation and cloud coverage: barely related to the target, often missing.
-
-### Metric ([exp03_metric](experiments/exp03_metric.md))
-
-- RMSLE = RMSE of `log1p` values → train on `log1p` with MSE loss.
-- Relative error: a 10% miss costs ≈ 0.095 at any scale. Harsh near zero: predicting 5 for a true 0 costs 1.79.
-- A few wrong zeros can dominate the score. Also track RMSLE per meter and without anomaly rows.
-- Alternative metric: MAE of `log1p`
-
-### Anomalies ([exp04_anomalies](experiments/exp04_anomalies.md))
-
-- Zero electricity = broken meter or data gap. Heating at zero for a week in the cold, or cooling in the heat, too.
-- → Drop them from training only. LightGBM, 4-fold average on clean rows: 1.140 → 1.061 without zero electricity,
-  → 1.048 with both rules, better in every fold. Shorter cut-offs work better: even a few hours of zeros teach the
-  model that a building can use no power.
-- On all rows the average barely moves (1.286 → 1.281): Jul–Dec improves, Jan–Jun gets worse, because there the
-  broken meters stay broken into the validation months. Oct–Dec alone (1.383 → 1.168) overstated the gain.
-- Anomaly rows stay in validation and cost up to 0.48 RMSLE per fold
-  ([exp02_seasons](../validation/experiments/exp02_seasons.md)).
-
-### What didn't work
-
-- Two more anomaly rules: stuck meters (same non-zero value for 48+ hours) and spikes (> 10× the daily median). On
-  top of both rules they change the 4-fold average by 0.003 at most; the spike rule mostly flagged normal on/off
-  cycling. Both left out.
-
-### What was removed from the notebook
-
-- Summary tables (per-column statistics, per-meter percentiles), the `year_built` histogram, a box plot by building
-  use (boxes overlapped too much), and per-site tables already shown by the time-zone plot.
+Training, validation and test get the same features from [ashrae/features.py](../ashrae/features.py): `log1p(square_feet)`, `year_built` with its missing flag, air and dew temperature, sea level pressure, wind speed, wind direction as sin/cos, hour of day and day of week as sin/cos in local time, and one-hot `meter` and `primary_use`. Building identity enters either as a learned 16-number embedding per building or as the mean `log1p` reading of each building × meter series ([exp02_building](../mlp/experiments/exp02_building.md)).

@@ -1,6 +1,6 @@
 # ASHRAE Great Energy Predictor III
 
-We predict hourly energy use of ~1,450 buildings at 16 sites for 4 meter types. The score is RMSLE ([exp03_metric](eda/experiments/exp03_metric.md)).
+We predict hourly energy use of ~1,450 buildings at 16 sites for 4 meter types. The score is RMSLE ([EDA and Preprocessing](eda/eda_report.md#metric)).
 
 The final submission is a blend of an MLP with building embeddings and LightGBM. It scores 1.178 on our validation, 1.086 public and 1.302 private on Kaggle. Unless noted, every score is the average over four seasonal folds of 2016 ([Validation Strategy](validation/validation_report.md#seasonal-4-fold)).
 
